@@ -24,12 +24,17 @@ class HalfAdder extends Module{
     /* 
      * TODO: Define IO ports of a half adder as presented in the lecture
      */
-    })
+    val a  = Input (UInt(1.W))
+    val b  = Input (UInt(1.W))
+    val s  = Output(UInt(1.W))
+    val cout = Output(UInt(1.W))
+  })
 
   /* 
    * TODO: Describe output behaviour based on the input values
    */
-
+   io.s := io.a ^ io.b
+   io.cout := io.a & io.b
 }
 
 /** 
@@ -49,6 +54,11 @@ class FullAdder extends Module{
     /* 
      * TODO: Define IO ports of a half adder as presented in the lecture
      */
+     val a  = Input (UInt(1.W))
+     val b  = Input (UInt(1.W))
+     val cin = Input (UInt(1.W))
+     val s  = Output(UInt(1.W))
+     val cout = Output(UInt(1.W))
     })
 
 
@@ -60,7 +70,8 @@ class FullAdder extends Module{
   /* 
    * TODO: Describe output behaviour based on the input values and the internal signals
    */
-
+  io.s := io.a ^ io.b ^ io.cin
+  io.cout := io.a & io.b | io.cin & (io.a ^ io.b)
 }
 
 /** 
@@ -79,14 +90,41 @@ class FourBitAdder extends Module{
     /* 
      * TODO: Define IO ports of a 4-bit ripple-carry-adder as presented in the lecture
      */
-    })
+    val a  = Input(UInt(4.W))
+    val b  = Input(UInt(4.W))
+    val s  = Output(UInt(4.W))
+  })
 
   /* 
    * TODO: Instanciate the full adders and one half adderbased on the previously defined classes
    */
-
+  val half_adder0 = Module(new HalfAdder)
+  val full_adder1 = Module(new FullAdder)
+  val full_adder2 = Module(new FullAdder)
+  val full_adder3 = Module(new FullAdder)
 
   /* 
    * TODO: Describe output behaviour based on the input values and the internal 
    */
+  half_adder0.io.a := io.a(0)
+  half_adder0.io.b := io.b(0)
+   
+  full_adder1.io.a := io.a(1)
+  full_adder1.io.b := io.b(1)
+  full_adder1.io.cin := half_adder0.io.cout
+
+  full_adder2.io.a := io.a(2)
+  full_adder2.io.b := io.b(2)
+  full_adder2.io.cin := full_adder1.io.cout
+
+  full_adder3.io.a := io.a(3)
+  full_adder3.io.b := io.b(3)
+  full_adder3.io.cin := full_adder2.io.cout
+
+  io.s := Cat(
+    full_adder3.io.s,
+    full_adder2.io.s,
+    full_adder1.io.s,
+    half_adder0.io.s
+  )
 }
